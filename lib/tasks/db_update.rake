@@ -7,6 +7,7 @@ namespace :db_update do
       keyword.save
     end
   end
+  
   # deprecate this, for testing only
   task :reset_counters => :environment do
     Keyword.all.each do |keyword|

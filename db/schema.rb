@@ -15,18 +15,18 @@ ActiveRecord::Schema.define(version: 20150111170415) do
 
   create_table "keywords", force: :cascade do |t|
     t.string   "word",        limit: 255
-    t.datetime "created_at",                              null: false
-    t.datetime "updated_at",                              null: false
-    t.boolean  "favorite",                default: false
-    t.integer  "competition",             default: 0
-    t.decimal  "r_value",                 default: 0.0
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.boolean  "favorite",                               default: false
+    t.integer  "competition", limit: 4,                  default: 0
+    t.decimal  "r_value",                 precision: 10, default: 0
   end
 
   create_table "title_results", force: :cascade do |t|
-    t.integer  "keyword_id"
-    t.integer  "google_count"
-    t.datetime "created_at",   null: false
-    t.datetime "updated_at",   null: false
+    t.integer  "keyword_id",   limit: 4
+    t.integer  "google_count", limit: 4
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
 end

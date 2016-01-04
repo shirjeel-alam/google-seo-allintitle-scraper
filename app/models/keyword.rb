@@ -1,3 +1,16 @@
+# == Schema Information
+#
+# Table name: keywords
+#
+#  id          :integer          not null, primary key
+#  word        :string(255)
+#  created_at  :datetime
+#  updated_at  :datetime
+#  favorite    :boolean          default(FALSE)
+#  competition :integer          default(0)
+#  r_value     :decimal(10, )    default(0)
+#
+
 class Keyword < ActiveRecord::Base
   
   validates :word, uniqueness: true
@@ -59,26 +72,42 @@ class Keyword < ActiveRecord::Base
     end unless override
     
     begin
-      require 'nokogiri'
-      require 'open-uri'
+      # require 'nokogiri'
+      # require 'open-uri'
+      
+      # # Build the url to use for Nokogiri
+      # url = @@base_url + @@quotes + word + @@quotes
+      # doc = Nokogiri::HTML(open("#{url}"))
+
+      # # Strip the google results
+      # result = doc.css('#resultStats').text
+      # result = result.gsub("About ","")
+      # result = result.gsub(" results", "")
+      # result = result.gsub(",", "")
+
       # Replace spaces in word with proper URL encoding format
       word = self.word.gsub(" ", "%20")
 
-      # Build the url to use for Nokogiri
+      # Build the url to use for Nechanize
       url = @@base_url + @@quotes + word + @@quotes
-      doc = Nokogiri::HTML(open("#{url}"))
 
-      # Strip the google results
-      result = doc.css('#resultStats').text
-      result = result.gsub("About ","")
-      result = result.gsub(" results", "")
-      result = result.gsub(",", "")
+      # require 'mechanize'
+      mechanize = Mechanize.new { |agent| 
+        agent.user_agent_alias = 'Windows Chrome'
+      }
+
+      page = mechanize.get(url)
+      while page.link_with(text: 'Next').present? do
+        page = page.link_with(text: 'Next').click
+      end
+      result = page.css('#resultStats').text
+      result = result.split[3].to_i
 
       puts "all in title: " + result.to_s
     rescue Exception => e
       puts e.message
       puts e.backtrace
-      puts 'Nokogiri, we have a problem...'
+      puts 'Mechanize, we have a problem...'
       return false
     end
     
@@ -128,7 +157,8 @@ class Keyword < ActiveRecord::Base
   end
   
   def ready_to_scrape?
-    title_results.count > 0 && (DateTime.now.to_i - current_allintitle.created_at.to_i) >= 1.day.to_i ? true : false
+    true
+    # title_results.count > 0 && (DateTime.now.to_i - current_allintitle.created_at.to_i) >= 1.day.to_i ? true : false
   end
   
   def slope
@@ -149,9 +179,5 @@ class Keyword < ActiveRecord::Base
       @@competition_levels[:high]
     end
   end
-  
-  # def word
-  #   '**OBFUSCATED NYANYANYA**'
-  # end
   
 end
